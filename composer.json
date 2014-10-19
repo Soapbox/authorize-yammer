@@ -1,0 +1,30 @@
+{
+    "name": "soapbox/authorize-yammer",
+    "description": "Yammer authorization strategy for SoapBox/Authorize.",
+    "keywords": ["authentication", "oauth", "yammer"],
+    "description": "",
+    "authors": [
+        {
+            "name": "SoapBox",
+            "email": "graham@soapboxhq.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@github.com:soapbox/authorize.git"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "soapbox/authorize": "dev-master",
+        "guzzle/guzzle": "~3.7",
+        "illuminate/support": "4.2.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "SoapBox\\AuthorizeYammer": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
