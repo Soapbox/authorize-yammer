@@ -28,7 +28,7 @@ class AuthorizeYammerServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		StrategyFactory::register('yammer', 'SoapBox\AuthorizeLinkedin\YammerStrategy');
+		StrategyFactory::register('yammer', 'SoapBox\AuthorizeYammer\YammerStrategy');
 	}
 
 	/**
