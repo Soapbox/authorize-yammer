@@ -23,9 +23,9 @@ class YammerStrategy extends SingleSignOnStrategy {
 		}
 
 		$this->yammer = new Yammer(array(
-			'clientId'		=>	$settings['api_key'],
-			'clientSecret'	=>	$settings['api_secret'],
-			'redirectUri'	=>	$settings['redirect_url']
+			'clientId'		=>	$parameters['api_key'],
+			'clientSecret'	=>	$parameters['api_secret'],
+			'redirectUri'	=>	$parameters['redirect_url']
 		));
 
 		if ($store != null && $load != null) {
@@ -47,20 +47,18 @@ class YammerStrategy extends SingleSignOnStrategy {
 	}
 
 	public function getUser($parameters = array()) {
-		if (!isset($parameters['accessToken'])) {
-			throw new AuthenticationException();
-		}
 
-		$accessToken = $parameters['accessToken'];
-		$response = $this->yammer->getUserDetails($accessToken);
+		// Try to get the access token using auth code
+		$response =  $this->yammer->getAccessToken([
+			'code' => $parameters['code']
+		]);
 
 		$user = new User;
-		$user->id = $response->uid;
-		$user->email = $response->email;
-		$user->accessToken = json_encode($accessToken);
-		$name = explode(' ', $response->name, 2);
-		$user->firstname = $name[0];
-		$user->lastname = $name[1];
+		$user->id = $response->user->id;
+		$user->email = $response->user->contact->email_addresses[0]->address;
+		$user->accessToken = json_encode($response->access_token);
+		$user->firstname = $response->user->first_name;
+		$user->lastname = $response->user->last_name;
 
 		return $user;
 	}
@@ -68,17 +66,9 @@ class YammerStrategy extends SingleSignOnStrategy {
 	public function endPoint($parameters = array()) {
 
 		if ( !isset($_GET['code'])) {
-
 			Helpers::redirect($this->yammer->getAuthorizationUrl());
-
-		} else {
-			// Try to get the access token using auth code
-			$accessToken =  $this->yammer->getAccessToken([
-				'code' => $_GET['code']
-			]);
 		}
 
-		return $this->getUser(['accessToken' => $accessToken]);
+		return $this->getUser(['code'=>$_GET['code']]);
 	}
 }
-
