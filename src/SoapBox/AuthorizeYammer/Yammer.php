@@ -1,24 +1,32 @@
-<?php namespace Soapbox\YammerOauth;
+<?php namespace SoapBox\AuthorizeYammer;
+
+use Guzzle\Service\Client as GuzzleClient;
 
 class Yammer {
 
-	public function urlAuthorize()
-	{
+	public function __construct($options = array()) {
+		foreach ($options as $option => $value) {
+			if (isset($this->{$option})) {
+				$this->{$option} = $value;
+			}
+		}
+
+		$this->httpClient = new GuzzleClient;
+	}
+
+	public function urlAuthorize() {
 		return 'https://www.yammer.com/dialog/oauth';
 	}
 
-	public function urlAccessToken()
-	{
+	public function urlAccessToken() {
 		return 'https://www.yammer.com/oauth2/access_token.json';
 	}
 
-	public function urlUserDetails(AccessToken $token)
-	{
+	public function urlUserDetails($token) {
 		return 'https://www.yammer.com/api/v1/users/current.json?access_token=' . $token;
 	}
 
-	public function getAuthorizationUrl($options = array())
-	{
+	public function getAuthorizationUrl($options = array()) {
 		$this->state = md5(uniqid(rand(), true));
 
 		$params = array(
@@ -33,15 +41,36 @@ class Yammer {
 		return $this->urlAuthorize() . '?' . http_build_query($params, 0, $arg_separator, null);
 	}
 
-	public function getAccessToken($params = array())
-	{
+	public function getAccessToken($params = array()) {
 		$defaultParams = array(
 			'client_id'		=> $this->clientId,
 			'client_secret'	=> $this->clientSecret,
-			'redirect_uri'	=> $this->redirectUri
+			'code'			=> $code
 		);
 
-		$ch = curl_init();
+		$client = $this->httpClient;
+		$client->setBaseUrl($this->urlAccessToken());
+		$request = $client->post(null, null, $defaultParams)->send();
+		$response = $request->getBody();
+
+		// if (isset($result['error']) && ! empty($result['error'])) {
+		//  // @codeCoverageIgnoreStart
+		//  throw new IDPException($result);
+		//  // @codeCoverageIgnoreEnd
+		// }
+
+		$response = json_decode($response);
+		return $response;
 	}
 
+	public function getUserDetails($token) {
+		$url = $this->urlUserDetails($token);
+
+		$client = $this->httpClient;
+		$client->setBaseUrl($url);
+		$request = $client->get()->send();
+		$response = $request->getBody();
+
+		return json_decode($response);
+	}
 }
