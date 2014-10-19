@@ -1,6 +1,7 @@
 <?php namespace SoapBox\AuthorizeYammer;
 
 use Illuminate\Support\ServiceProvider;
+use SoapBox\Authorize\StrategyFactory;
 
 class AuthorizeYammerServiceProvider extends ServiceProvider {
 
